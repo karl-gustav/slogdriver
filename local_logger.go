@@ -42,7 +42,11 @@ func (h *localHandler) Handle(ctx context.Context, r slog.Record) error {
 
 	fields := make(map[string]any, r.NumAttrs())
 	r.Attrs(func(a slog.Attr) bool {
-		fields[a.Key] = a.Value.Any()
+		if v, ok := a.Value.Any().(error); ok {
+			fields[a.Key] = v.Error()
+		} else {
+			fields[a.Key] = a.Value.Any()
+		}
 
 		return true
 	})
