@@ -61,3 +61,11 @@ func traceFromContext(ctx context.Context) string {
 	}
 	return trace.(string)
 }
+
+func (h *cloudHandler) WithAttrs(attrs []slog.Attr) slog.Handler {
+	return &cloudHandler{h.Handler.WithAttrs(attrs)}
+}
+
+func (h *cloudHandler) WithGroups(name string) slog.Handler {
+	return &cloudHandler{h.Handler.WithGroup(name)}
+}
