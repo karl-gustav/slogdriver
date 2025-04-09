@@ -7,6 +7,9 @@ import (
 	"net/http"
 	"os"
 	"strings"
+	"time"
+
+	"github.com/karl-gustav/slogdriver/google"
 )
 
 var cloudProjectID string
@@ -23,6 +26,8 @@ func NewCloudHandler(projectID string) *cloudHandler {
 		ReplaceAttr: func(groups []string, a slog.Attr) slog.Attr {
 			if a.Key == slog.MessageKey {
 				a.Key = "message"
+			} else if a.Key == slog.LevelKey {
+				a.Key = "severity"
 			} else if a.Key == slog.SourceKey {
 				a.Key = "logging.googleapis.com/sourceLocation"
 			}
@@ -44,13 +49,20 @@ func WithTraceContext(h http.Handler) http.Handler {
 }
 
 func (h *cloudHandler) Handle(ctx context.Context, rec slog.Record) error {
+	rec = rec.Clone()
 	trace := traceFromContext(ctx)
 	if trace != "" {
-		rec = rec.Clone()
 		// Add trace ID to the record so it is correlated with the Cloud Run request log
 		// See https://cloud.google.com/trace/docs/trace-log-integration
 		rec.Add("logging.googleapis.com/trace", slog.StringValue(trace))
 	}
+	if rec.Level == slog.LevelError {
+		// See https://cloud.google.com/error-reporting/docs/formatting-error-messages#log-text
+		rec.Add("@type", "type.googleapis.com/google.devtools.clouderrorreporting.v1beta1.ReportedErrorEvent")
+	}
+	// See https://cloud.google.com/error-reporting/docs/formatting-error-messages#reported-error-example
+	rec.Add(slog.Group("serviceContext", slog.String("service", google.GetServiceName())))
+	rec.Add("timestamp", time.Now())
 	return h.Handler.Handle(ctx, rec)
 }
 
