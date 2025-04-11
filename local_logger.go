@@ -68,6 +68,6 @@ func (h *localHandler) WithAttrs(attrs []slog.Attr) slog.Handler {
 	return &localHandler{h.Handler.WithAttrs(attrs)}
 }
 
-func (h *localHandler) WithGroups(name string) slog.Handler {
+func (h *localHandler) WithGroup(name string) slog.Handler {
 	return &localHandler{h.Handler.WithGroup(name)}
 }
