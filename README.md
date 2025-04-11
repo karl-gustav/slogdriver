@@ -17,9 +17,9 @@ func init() {
 		if err != nil {
 			panic(err)
 		}
-		slog.SetDefault(slog.New(slogdriver.NewCloudHandler(projectID)))
+		slog.SetDefault(slog.New(slogdriver.NewCloudHandler(projectID, slog.DebugLevel)))
 	} else {
-		slog.SetDefault(slog.New(slogdriver.NewLocalHandler()))
+		slog.SetDefault(slog.New(slogdriver.NewLocalHandler(slog.DebugLevel)))
 	}
 }
 ```

@@ -3,6 +3,7 @@ package slogdriver
 import (
 	"context"
 	"fmt"
+	"io"
 	"log/slog"
 	"net/http"
 	"os"
@@ -18,11 +19,14 @@ const traceContextKey = "google-cloud-trace-id"
 
 type cloudHandler struct{ slog.Handler }
 
-func NewCloudHandler(projectID string) *cloudHandler {
+func NewCloudHandler(projectID string, level slog.Level, optionalWriter ...io.Writer) *cloudHandler {
 	cloudProjectID = projectID
-	return &cloudHandler{Handler: slog.NewJSONHandler(os.Stderr, &slog.HandlerOptions{
+	if len(optionalWriter) == 0 {
+		optionalWriter[0] = os.Stderr
+	}
+	return &cloudHandler{Handler: slog.NewJSONHandler(optionalWriter[0], &slog.HandlerOptions{
 		AddSource: true,
-		Level:     slog.LevelDebug,
+		Level:     level,
 		ReplaceAttr: func(groups []string, a slog.Attr) slog.Attr {
 			if a.Key == slog.MessageKey {
 				a.Key = "message"
