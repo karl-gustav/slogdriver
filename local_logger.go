@@ -82,6 +82,7 @@ func (i *internalWriter) Write(p []byte) (int, error) {
 		return 0, err
 	}
 	buf.Write(j)
+	buf.WriteByte('\n')
 	_, err = i.externalWriter.Write(buf.Bytes())
 	if err != nil {
 		return 0, err

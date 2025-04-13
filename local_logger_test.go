@@ -1,6 +1,7 @@
 package slogdriver_test
 
 import (
+	"fmt"
 	"log/slog"
 	"strings"
 	"testing"
@@ -32,12 +33,15 @@ func TestLocalHandler(t *testing.T) {
 	time.Sleep(1 * time.Second)
 
 	lines := writer.store
-	// for i, val := range lines {
-	// 	fmt.Printf("line %d: %v\n", i, val)
-	// }
+	for i, val := range lines {
+		fmt.Printf("line %d: %v\n", i, val)
+	}
 	line := lines[0]
 	if !strings.Contains(line, "debug message") {
 		t.Errorf("output missing 'debug message':\n%s", line)
+	}
+	if !strings.HasSuffix(line, "\n") {
+		t.Errorf("line missing newline suffix:\n%s", line)
 	}
 	line = lines[1]
 	if !strings.Contains(line, "info message") {
