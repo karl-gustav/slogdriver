@@ -1,7 +1,13 @@
 # What
 
-Slog driver for getting logs to show up properly in Google Cloud logs. In
-particularly for Google Cloud Run services/jobs and Google App Engine.
+Slog driver for getting logs to show up properly in Google Cloud logs and easy to read local logging. In
+particular for Google Cloud Run services/jobs and Google App Engine.
+
+Google cloud supports structured logging, but the fields need to be a certain way for it to show up
+properly and to report logs to Error Logging and so forth.
+
+For local logging it's hard to read structured logs, so there only part of the logs is structured, i.e.
+the log attributes show up in a nice pretty printed JSON list and the message is printed as regular text.
 
 # How
 
