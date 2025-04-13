@@ -3,7 +3,6 @@ package slogdriver
 import (
 	"context"
 	"fmt"
-	"io"
 	"log/slog"
 	"net/http"
 	"os"
@@ -15,29 +14,31 @@ import (
 
 var cloudProjectID string
 
-const traceContextKey = "google-cloud-trace-id"
+type contextKey string
+
+const traceContextKey contextKey = "google-cloud-trace-id"
 
 type cloudHandler struct{ slog.Handler }
 
-func NewCloudHandler(projectID string, level slog.Level, optionalWriter ...io.Writer) *cloudHandler {
+func NewCloudHandler(projectID string, level slog.Level) *cloudHandler {
 	cloudProjectID = projectID
-	if len(optionalWriter) == 0 {
-		optionalWriter[0] = os.Stderr
+	return &cloudHandler{
+		Handler: slog.NewJSONHandler(os.Stderr, &slog.HandlerOptions{
+			AddSource: true,
+			Level:     level,
+			ReplaceAttr: func(groups []string, a slog.Attr) slog.Attr {
+				switch a.Key {
+				case slog.MessageKey:
+					a.Key = "message"
+				case slog.LevelKey:
+					a.Key = "severity"
+				case slog.SourceKey:
+					a.Key = "logging.googleapis.com/sourceLocation"
+				}
+				return a
+			},
+		}),
 	}
-	return &cloudHandler{Handler: slog.NewJSONHandler(optionalWriter[0], &slog.HandlerOptions{
-		AddSource: true,
-		Level:     level,
-		ReplaceAttr: func(groups []string, a slog.Attr) slog.Attr {
-			if a.Key == slog.MessageKey {
-				a.Key = "message"
-			} else if a.Key == slog.LevelKey {
-				a.Key = "severity"
-			} else if a.Key == slog.SourceKey {
-				a.Key = "logging.googleapis.com/sourceLocation"
-			}
-			return a
-		},
-	})}
 }
 
 func WithTraceContext(h http.Handler) http.Handler {
@@ -82,6 +83,6 @@ func (h *cloudHandler) WithAttrs(attrs []slog.Attr) slog.Handler {
 	return &cloudHandler{h.Handler.WithAttrs(attrs)}
 }
 
-func (h *cloudHandler) WithGroups(name string) slog.Handler {
+func (h *cloudHandler) WithGroup(name string) slog.Handler {
 	return &cloudHandler{h.Handler.WithGroup(name)}
 }
