@@ -28,9 +28,9 @@ Using environment variable (you need to set this yourself)
 ```go
 func init() {
 	if slogdriver.OnGCP() {
-		slog.SetDefault(slog.New(slogdriver.NewCloudHandler(os.Getenv("PROJECT_ID")))
+		slog.SetDefault(slog.New(slogdriver.NewCloudHandler(os.Getenv("PROJECT_ID"), slog.DebugLevel))
 	} else {
-		slog.SetDefault(slog.New(slogdriver.NewLocalHandler()))
+		slog.SetDefault(slog.New(slogdriver.NewLocalHandler(slog.DebugLevel)))
 	}
 }
 ```
