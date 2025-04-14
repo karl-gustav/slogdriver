@@ -68,6 +68,31 @@ wrappedMux := slogdriver.WithTraceContext(mux)
 http.ListenAndServe(addr, wrappedMux)
 ```
 
+# Results
+
+When logging in Google cloud
+```json
+
+{
+  "insertId": "67fd6fdc000048adac2ce177",
+  "jsonPayload": {
+    "a float": 2,
+    "a string": "value of string",
+    "message": "Message text",
+    "an int": 1,
+    "a bool": true
+    "serviceContext": {
+      "service": "test-slogdriver"
+    },
+  },
+  ...
+}
+```
+
+When using the local logger
+<br>
+![Local logger example](https://storage.googleapis.com/my-cloud-static/slog_local_logger.PNG)
+
 ##### Based on
 - [betterstack.com/guides/logging-in-go](https://betterstack.com/community/guides/logging/logging-in-go/#customizing-slog-handlers)
 - [github.com/remko/cloudrun-slog](https://github.com/remko/cloudrun-slog/blob/main/main.go)
